@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -36,7 +37,7 @@ public class AccountController {
     })
     public ResponseEntity<AccountResponse> createAccount(
             @Parameter(description = "ID пользователя")
-            @RequestHeader("X-User-Id") String userId
+            @RequestHeader("X-User-Id") UUID userId
     ) {
         AccountResponse response = accountService.createAccount(userId);
         return ResponseEntity.ok(response);
@@ -51,7 +52,7 @@ public class AccountController {
     })
     public ResponseEntity<AccountResponse> topUp(
             @Parameter(description = "ID пользователя")
-            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Id") UUID userId,
             @RequestBody TopUpRequest request
     ) {
 
@@ -67,7 +68,7 @@ public class AccountController {
     })
     public ResponseEntity<BalanceResponse> getBalance(
             @Parameter(description = "ID пользователя")
-            @RequestHeader("X-User-Id") String userId
+            @RequestHeader("X-User-Id") UUID userId
     ) {
         BalanceResponse response = accountService.getBalance(userId);
         return ResponseEntity.ok(response);

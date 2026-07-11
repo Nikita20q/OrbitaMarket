@@ -3,6 +3,7 @@ package com.orbitamarket.orders.controller;
 import com.orbitamarket.orders.domain.dto.OrderRequest;
 import com.orbitamarket.orders.domain.dto.OrderResponse;
 import com.orbitamarket.orders.domain.entity.Order;
+import com.orbitamarket.orders.exception.OrderNotFoundException;
 import com.orbitamarket.orders.repository.OrderRepository;
 import com.orbitamarket.orders.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +36,7 @@ public class OrderController {
     })
     public ResponseEntity<OrderResponse> createOrder(
             @Parameter(description = "ID пользователя")
-            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Id") UUID userId,
             @RequestBody OrderRequest request
     ) {
         OrderResponse response = orderService.createOrder(userId, request);
@@ -46,7 +47,7 @@ public class OrderController {
     @Operation(summary = "Получить список заказов пользователя")
     public ResponseEntity<List<OrderResponse>> getUserOrders(
         @Parameter(description = "ID пользователя")
-        @RequestHeader("X-User-Id") String userId
+        @RequestHeader("X-User-Id") UUID userId
     ) {
         List<OrderResponse> orders = orderRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse)
@@ -56,9 +57,17 @@ public class OrderController {
 
     @GetMapping("/orders/{orderId}")
     @Operation(summary = "Получить детали заказа")
-    public ResponseEntity<OrderResponse> getOrder(@PathVariable UUID orderId) {
+    public ResponseEntity<OrderResponse> getOrder(
+            @PathVariable UUID orderId,
+            @RequestHeader("X-User-Id") UUID userId
+    ) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("order not found"));
+                .orElseThrow(() -> new OrderNotFoundException("Order not found: " + orderId));
+
+        if (!order.getUserId().equals(userId)) {
+            throw new OrderNotFoundException("Order not found: " + orderId);
+        }
+
         return ResponseEntity.ok(mapToResponse(order));
     }
 
@@ -69,6 +78,7 @@ public class OrderController {
                 .productType(order.getProductType())
                 .price(order.getPrice())
                 .createdAt(order.getCreatedAt())
+                .failureReason(order.getFailureReason())
                 .build();
     }
 }

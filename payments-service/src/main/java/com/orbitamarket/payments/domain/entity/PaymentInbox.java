@@ -1,9 +1,6 @@
 package com.orbitamarket.payments.domain.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +11,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "payment_inbox")
+@Table(name = "payment_inbox", indexes = {
+        @Index(name = "idx_payment_inbox_order_id", columnList = "order_id"),
+        @Index(name = "idx_payment_inbox_user_id", columnList = "user_id")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,7 +34,7 @@ public class PaymentInbox {
     private UUID orderId;
 
     @Column(name = "user_id", nullable = false)
-    private String userId;
+    private UUID userId;
 
     @Column(nullable = false)
     private BigDecimal amount;

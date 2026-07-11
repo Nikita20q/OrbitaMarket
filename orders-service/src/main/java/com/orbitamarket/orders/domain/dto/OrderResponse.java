@@ -19,4 +19,5 @@ public class OrderResponse {
     private ProductType productType;
     private BigDecimal price;
     private LocalDateTime createdAt;
+    private String failureReason;
 }

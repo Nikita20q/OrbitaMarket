@@ -23,7 +23,7 @@ public class OutboxPollingPublisher {
     private final KafkaTemplate<String, OrderPaymentRequested> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 1000)
     public void pollAndPublish() {
         List<OrderOutbox> orderOutboxes = outboxRepository.findByStatus(OutboxStatus.PENDING);
 
@@ -39,22 +39,16 @@ public class OutboxPollingPublisher {
     }
 
     @Transactional
-    public void  processRecord(OrderOutbox record) {
+    public void processRecord(OrderOutbox record) {
         try {
             OrderPaymentRequested event = objectMapper.readValue(record.getPayload(), OrderPaymentRequested.class);
-            kafkaTemplate.send("order-payment-requested",
-                    event.getOrderId().toString(),
-            event)
-                    .whenComplete((result, ex) -> {
-                        if (ex == null) {
-                            markAsSent(record);
-                            log.info("Outbox record {} sent to Kafka successfully", record.getEventId());
-                        } else {
-                            markAsFailed(record, ex.getMessage());
-                            log.error("Failed to send outbox record {}: {}",
-                                    record.getEventId(), ex.getMessage());
-                        }
-                    });
+
+            kafkaTemplate.send("order-payment-requested", event.getOrderId().toString(), event)
+                    .get();
+
+            markAsSent(record);
+            log.info("Outbox record {} sent to Kafka successfully", record.getEventId());
+
         } catch (Exception e) {
             markAsFailed(record, e.getMessage());
             log.error("Failed to process outbox record {}: {}", record.getEventId(), e.getMessage());

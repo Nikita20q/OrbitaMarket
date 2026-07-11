@@ -21,6 +21,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    security_opt:
+      - no-new-privileges:true
 
   kafka:
     image: apache/kafka:latest
@@ -45,6 +47,8 @@ services:
       - ./data/kafka:/tmp/kraft-combined-logs
     networks:
       - orbita-net
+    security_opt:
+      - no-new-privileges:true
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -58,6 +62,11 @@ services:
       - kafka
     networks:
       - orbita-net
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
 
   payments-service:
     build:

@@ -9,13 +9,8 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
+            allowedOriginPatterns: "*"
+            allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
             allowedHeaders: "*"
 
       routes:
@@ -23,15 +18,25 @@ spring:
           uri: http://payments-service:8081
           predicates:
             - Path=/api/v1/payments/**
-          filters:
-            - StripPrefix=0
 
         - id: orders-service
           uri: http://orders-service:8082
           predicates:
             - Path=/api/v1/orders/**
+
+        - id: payments-api-docs
+          uri: http://payments-service:8081
+          predicates:
+            - Path=/api/payments/v3/api-docs
           filters:
-            - StripPrefix=0
+            - SetPath=/v3/api-docs
+
+        - id: orders-api-docs
+          uri: http://orders-service:8082
+          predicates:
+            - Path=/api/orders/v3/api-docs
+          filters:
+            - SetPath=/v3/api-docs
 
         - id: payments-swagger-ui
           uri: http://payments-service:8081
@@ -47,6 +52,16 @@ spring:
           filters:
             - RewritePath=/orders/(?<segment>.*), /${segment}
 
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: Payments Service
+        url: payments/v3/api-docs
+      - name: Orders Service
+        url: orders/v3/api-docs
+
 management:
   endpoints:
     web:
@@ -55,7 +70,3 @@ management:
   endpoint:
     gateway:
       enabled: true
-
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG

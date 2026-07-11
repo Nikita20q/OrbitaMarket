@@ -16,7 +16,7 @@ import java.util.UUID;
 public class OrderPaymentRequested {
     private UUID eventId;
     private UUID orderId;
-    private String userId;
+    private UUID userId;
     private BigDecimal amount;
     private LocalDateTime occurredAt;
 }

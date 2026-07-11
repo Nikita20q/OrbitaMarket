@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 public class BalanceResponse {
-    private String userId;
+    private UUID userId;
     private BigDecimal balance;
     private String currency;
 }

@@ -16,7 +16,7 @@ import java.util.UUID;
 public class OrderPaymentFailed {
     private UUID eventId;
     private UUID orderId;
-    private String userId;
+    private UUID userId;
     private String reason;
     private BigDecimal amount;
     private LocalDateTime occurredAt;

@@ -1,0 +1,28 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container diagram for OrbitaMarket
+
+Person(client, "Client", "Использует API для покупки данных")
+
+System_Boundary(orbitamarket, "OrbitaMarket Platform") {
+    Container(gateway, "API Gateway", "Spring Cloud Gateway", "Маршрутизация запросов")
+    
+    Container(payments, "Payments Service", "Spring Boot", "Счета и балансы")
+    Container(orders, "Orders Service", "Spring Boot", "Заказы + Outbox Pattern")
+    
+    ContainerDb(payments_db, "Payments DB", "PostgreSQL", "accounts, payment_inbox")
+    ContainerDb(orders_db, "Orders DB", "PostgreSQL", "orders, order_outbox")
+    
+    ContainerQueue(kafka, "Apache Kafka", "Message Broker", "Асинхронные события")
+}
+
+Rel(client, gateway, "REST API", "HTTP")
+Rel(gateway, payments, "/api/v1/payments/**", "HTTP")
+Rel(gateway, orders, "/api/v1/orders/**", "HTTP")
+Rel(payments, payments_db, "JPA")
+Rel(orders, orders_db, "JPA")
+Rel(orders, kafka, "Outbox Pattern", "Kafka")
+Rel(kafka, payments, "Events", "Kafka")
+
+@enduml

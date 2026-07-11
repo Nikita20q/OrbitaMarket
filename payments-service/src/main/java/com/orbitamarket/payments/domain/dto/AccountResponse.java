@@ -14,6 +14,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AccountResponse {
     private UUID id;
-    private String userId;
+    private UUID userId;
     private BigDecimal balance;
 }

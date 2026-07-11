@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -35,7 +37,8 @@ public class PaymentService {
                 .orElse(null);
 
         if (account == null) {
-            log.warn("Account not found for user: {}", event.getUserId());
+            saveToInbox(event, "ORDER_PAYMENT_REQUESTED");
+
             OrderPaymentFailed failed = OrderPaymentFailed.builder()
                     .eventId(UUID.randomUUID())
                     .orderId(event.getOrderId())
@@ -44,15 +47,23 @@ public class PaymentService {
                     .amount(event.getAmount())
                     .occurredAt(LocalDateTime.now())
                     .build();
-            paymentEventProducer.sendPaymentFailed(failed);
 
-            saveToInbox(event, "ORDER_PAYMENT_REQUESTED");
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            paymentEventProducer.sendPaymentFailed(failed);
+                        }
+                    }
+            );
             return;
         }
+
 
         if (account.getBalance().compareTo(event.getAmount()) < 0) {
             log.warn("Insufficient balance for user {}: {} < {}",
                     event.getUserId(), account.getBalance(), event.getAmount());
+
             OrderPaymentFailed failed = OrderPaymentFailed.builder()
                     .eventId(UUID.randomUUID())
                     .orderId(event.getOrderId())
@@ -62,15 +73,23 @@ public class PaymentService {
                     .occurredAt(LocalDateTime.now())
                     .build();
 
-            paymentEventProducer.sendPaymentFailed(failed);
             saveToInbox(event, "ORDER_PAYMENT_REQUESTED");
+
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            paymentEventProducer.sendPaymentFailed(failed);
+                        }
+                    }
+            );
             return;
         }
 
         account.setBalance(account.getBalance().subtract(event.getAmount()));
         accountRepository.save(account);
-        log.info("Payment successful for order {}: {} geocredits debited",
-                event.getOrderId(), event.getAmount());
+
+        saveToInbox(event, "ORDER_PAYMENT_REQUESTED");
 
         OrderPaymentCompleted completed = OrderPaymentCompleted.builder()
                 .eventId(UUID.randomUUID())
@@ -80,8 +99,17 @@ public class PaymentService {
                 .newBalance(account.getBalance())
                 .occurredAt(LocalDateTime.now())
                 .build();
-        paymentEventProducer.sendPaymentCompleted(completed);
-        saveToInbox(event, "ORDER_PAYMENT_REQUESTED");
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        paymentEventProducer.sendPaymentCompleted(completed);
+                    }
+                }
+        );
+
+        log.info("Payment successful for order {}", event.getOrderId());
     }
 
     private void saveToInbox(OrderPaymentRequested event, String eventType) {

@@ -8,6 +8,9 @@ import com.orbitamarket.orders.domain.entity.OrderOutbox;
 import com.orbitamarket.orders.domain.enums.OrderStatus;
 import com.orbitamarket.orders.domain.enums.OutboxStatus;
 import com.orbitamarket.orders.domain.event.OrderPaymentRequested;
+import com.orbitamarket.orders.exception.InvalidPayloadException;
+import com.orbitamarket.orders.exception.InvalidPriceException;
+import com.orbitamarket.orders.exception.UnknownProductTypeException;
 import com.orbitamarket.orders.repository.OrderOutboxRepository;
 import com.orbitamarket.orders.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,16 +32,24 @@ public class OrderService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public OrderResponse createOrder(String userId, OrderRequest orderRequest) {
+    public OrderResponse createOrder(UUID userId, OrderRequest orderRequest) {
         if (orderRequest.getPrice() == null || orderRequest.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Price must be greater than zero");
+            throw new InvalidPriceException("Price must be greater than zero");
+        }
+
+        if (orderRequest.getProductType() == null) {
+            throw new UnknownProductTypeException("Product type is required");
+        }
+
+        if (orderRequest.getPayload() == null) {
+            throw new InvalidPayloadException("Payload is required");
         }
 
         String payloadJson;
         try {
             payloadJson = objectMapper.writeValueAsString(orderRequest.getPayload());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to serialize payload", e);
+            throw new InvalidPayloadException("Failed to serialize payload: " + e.getMessage());
         }
 
         Order order = Order.builder()

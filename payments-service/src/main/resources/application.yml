@@ -6,7 +6,7 @@ spring:
   application:
     name: payments-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/payments_db
+    url: jdbc:postgresql://postgres:5432/payments_db
     username: postgres
     password: postgres
   jpa:
@@ -17,7 +17,7 @@ spring:
       hibernate:
         format_sql: true
   kafka:
-    bootstrap-servers: localhost:29093
+    bootstrap-servers: kafka:9093
 
 springdoc:
   api-docs:

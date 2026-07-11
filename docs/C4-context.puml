@@ -1,0 +1,26 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context diagram for OrbitaMarket
+
+skinparam backgroundColor #F5F5F5
+
+Person(operator, "Оператор ДЗЗ", "Отправляет запросы на съёмку")
+Person(analyst, "Аналитик", "Покупает архивные снимки")
+Person(admin, "Администратор", "Управляет платформой")
+
+System_Boundary(orbitamarket, "OrbitaMarket Platform") {
+    System(gateway, "API Gateway", "Единая точка входа, маршрутизация HTTP")
+}
+
+SystemDb(postgres, "PostgreSQL", "База данных для хранения счетов и заказов")
+SystemQueue(kafka, "Apache Kafka", "Брокер сообщений для асинхронного взаимодействия")
+
+Rel(operator, gateway, "REST API запросы", "HTTP")
+Rel(analyst, gateway, "REST API запросы", "HTTP")
+Rel(admin, gateway, "REST API запросы", "HTTP")
+
+Rel(gateway, postgres, "JDBC", "Чтение/запись данных")
+Rel(gateway, kafka, "Kafka Protocol", "Асинхронные события")
+
+@enduml

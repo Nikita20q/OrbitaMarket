@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "account")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,7 +21,7 @@ public class Account {
     private UUID id;
 
     @Column(name = "user_id", nullable = false, unique = true)
-    private String userId;
+    private UUID userId;
 
     @Column(nullable = false)
     private BigDecimal balance;
