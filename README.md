@@ -88,9 +88,9 @@ docker compose up -d --build
 Диаграммы архитектуры находятся в папке `docs/`:
 
 - 📄 [C1 System Context](docs/c4-context.puml) — внешние акторы и система
-![C1](C1.png)
+![C1](./docs/screens/C1.png)
 - 📦 [C2 Containers](docs/c4-container.puml) — внутренние компоненты
-![C2](C2.png)
+![C2](./docs/screens/C2.png)
 ### Схема взаимодействия
 
 **Описание потока:**
@@ -115,7 +115,7 @@ docker compose up -d --build
    - Orders Service получает результат из Kafka
    - Обновляет статус заказа на PAID или PAYMENT_FAILED
 
-![Поток данных](data_flow.png)
+![Поток данных](./docs/screens/data_flow.png)
 ### Контракты событий
 
 #### OrderPaymentRequested (Orders → Payments)
@@ -327,7 +327,7 @@ SQL-запросы для бизнес-аналитики находятся в 
 
 **Пример одного из запросов:**
 
-![Аналитика](sql-analytics.png)
+![Аналитика](./docs/screens/sql-analytics.png)
 
 ---
 ```
