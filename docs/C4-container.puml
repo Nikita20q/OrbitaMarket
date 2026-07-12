@@ -3,6 +3,8 @@
 
 title Container diagram for OrbitaMarket
 
+skinparam backgroundColor #F5F5F5
+
 Person(client, "Client", "Использует API для покупки данных")
 
 System_Boundary(orbitamarket, "OrbitaMarket Platform") {
