@@ -152,7 +152,6 @@ docker compose up -d --build
 }
 ```
 ---
-## 
 ## 🔐 Механизмы защиты данных
 
 ### Optimistic Locking (`@Version`)

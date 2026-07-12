@@ -1,8 +1,6 @@
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
-title System Context diagram for OrbitaMarket
-
 skinparam backgroundColor #F5F5F5
 
 Person(client, "Клиент платформы", "Операторы ДЗЗ, аналитические компании, исследователи — покупают снимки через API")
