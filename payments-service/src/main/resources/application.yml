@@ -19,6 +19,18 @@ spring:
   kafka:
     bootstrap-servers: kafka:9093
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+
 springdoc:
   api-docs:
     path: /v3/api-docs

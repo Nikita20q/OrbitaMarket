@@ -49,6 +49,12 @@ services:
       - orbita-net
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9093 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -59,7 +65,8 @@ services:
       KAFKA_CLUSTERS_0_NAME: orbita-local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     networks:
       - orbita-net
     security_opt:
@@ -84,9 +91,15 @@ services:
       postgres:
         condition: service_healthy
       kafka:
-        condition: service_started
+        condition: service_healthy
     networks:
       - orbita-net
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8081/actuator/health || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   orders-service:
     build:
@@ -104,9 +117,15 @@ services:
       postgres:
         condition: service_healthy
       kafka:
-        condition: service_started
+        condition: service_healthy
     networks:
       - orbita-net
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8082/actuator/health || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   api-gateway:
     build:
@@ -116,10 +135,18 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - payments-service
-      - orders-service
+      payments-service:
+        condition: service_healthy
+      orders-service:
+        condition: service_healthy
     networks:
       - orbita-net
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8080/actuator/health || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
 
 networks:
   orbita-net:

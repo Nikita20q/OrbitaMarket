@@ -318,7 +318,7 @@ gitleaks detect --source . --report-format json --report-path security-reports/g
 semgrep scan --config auto --json --output security-reports/semgrep-report.json
 ```
 
-📄 [Результаты и триаж](./security-reports/Triaj) — Результаты сканирования (./security-reports/Triaj)
+📄 [Результаты и триаж](./security-reports/Triaj) — Результаты сканирования (./security-reports/Triaj.md)
 
 ---
 ## 📊 Аналитика (SQL)

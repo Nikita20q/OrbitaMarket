@@ -29,6 +29,7 @@ dependencies {
     // PostgreSQL
     runtimeOnly("org.postgresql:postgresql")
 
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.kafka:spring-kafka")
 }
 
